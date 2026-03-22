@@ -105,7 +105,7 @@ function login() {
 
       db.collection("messages").add({
         text: message,
-        phone: user.phoneNumber,
+        email: user.email,
         createdAt: new Date()
       });
 
