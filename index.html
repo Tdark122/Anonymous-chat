@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Anonymous Message</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, textarea {
+      padding: 10px;
+      width: 250px;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    #chat, #verify {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Send Anonymous Message</h2>
+
+  <!-- PHONE LOGIN -->
+  <div id="login">
+    <input type="text" id="phone" placeholder="+2348012345678"><br>
+    <div id="recaptcha"></div>
+    <button onclick="sendOTP()">Send OTP</button>
+  </div>
+
+  <!-- OTP VERIFY -->
+  <div id="verify">
+    <input type="text" id="code" placeholder="Enter OTP"><br>
+    <button onclick="verifyOTP()">Verify</button>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat">
+    <textarea id="message" placeholder="Type your message"></textarea><br>
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+  <script>
+    // 🔥 REPLACE ONLY THIS PART WITH YOUR OWN CONFIG
+     const firebaseConfig = {
+  apiKey: "AIzaSyCzpYx5aEVoFAoBat2UchqyxsRDOgWB8S0",
+  authDomain: "anonymous-app-d1db3.firebaseapp.com",
+  projectId: "anonymous-app-d1db3",
+  storageBucket: "anonymous-app-d1db3.firebasestorage.app",
+  messagingSenderId: "292970978121",
+  appId: "1:292970978121:web:9f2683567daa4b780f9898",
+  measurementId: "G-VDGTMZ148Z"
+};
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let confirmationResult;
+
+    // Setup reCAPTCHA
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', {
+      size: 'normal'
+    });
+
+    // SEND OTP
+    function sendOTP() {
+      const phone = document.getElementById("phone").value;
+
+      auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+        .then(result => {
+          confirmationResult = result;
+          document.getElementById("verify").style.display = "block";
+        })
+        .catch(error => alert(error.message));
+    }
+
+    // VERIFY OTP
+    function verifyOTP() {
+      const code = document.getElementById("code").value;
+
+      confirmationResult.confirm(code)
+        .then(() => {
+          document.getElementById("chat").style.display = "block";
+          document.getElementById("login").style.display = "none";
+        })
+        .catch(error => alert(error.message));
+    }
+
+    // SEND MESSAGE
+    function sendMessage() {
+      const user = auth.currentUser;
+      const message = document.getElementById("message").value;
+
+      if (!message) {
+        alert("Type something");
+        return;
+      }
+
+      db.collection("messages").add({
+        text: message,
+        phone: user.phoneNumber,
+        createdAt: new Date()
+      });
+
+      alert("Message sent!");
+      document.getElementById("message").value = "";
+    }
+  </script>
+
+</body>
+</html>
