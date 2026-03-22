@@ -66,14 +66,7 @@
     firebase.initializeApp(firebaseConfig);
 
     const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    let confirmationResult;
-
-    // Setup reCAPTCHA
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', {
-      size: 'normal'
-    });
+    const db = firebase.firestore();   
 
     function signUp() {
   const email = document.getElementById("email").value;
